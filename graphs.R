@@ -114,7 +114,7 @@ graphs <- function(){
   p7 <- ggplot(final_df, aes(x = AgeAtAdmission, fill = Readmitted30)) +
     geom_density(alpha = 0.5) +
     scale_fill_manual(values = c("No" = "#5b9bd5", "Yes" = "#ed7d31")) +
-    labs(title = "Age Distribution Density by Readmission Status", x = "Age at Admission (Years)", y = "Density") +
+    labs(title = "Age Distribution Density by Readmission", x = "Age at Admission (Years)", y = "Density") +
     theme_minimal()
   print(p7)
   
