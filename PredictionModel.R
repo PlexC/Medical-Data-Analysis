@@ -131,6 +131,25 @@ logic <- function(){
   
   Sys.sleep(0.5)
   print(forest_plot)
+  
+  cat("\nGenerating Zoomed-In Forest Plot...\n")
+  
+  # Filter out the massive outlier so ggplot auto-zooms on the rest
+  summary_df_zoomed <- subset(summary_df, Variable != "High-Risk Disease (Top 5)")
+  
+  forest_plot_zoomed <- ggplot(summary_df_zoomed, aes(x = OddsRatio, y = reorder(Variable, OddsRatio))) +
+    geom_vline(xintercept = 1, linetype = "dashed", color = "red", linewidth = 1) +
+    geom_errorbar(aes(xmin = LowerCI, xmax = UpperCI), width = 0.2, color = "#5b9bd5", linewidth = 1.2, orientation = "y") +
+    geom_point(size = 5, color = "#ed7d31") +
+    labs(title = "Clinical Logistic Regression: Demographics (Zoomed In)",
+         subtitle = "Excluding High-Risk Disease to view the micro-impact of baseline features",
+         x = "Odds Ratio (Impact on Readmission)", y = "Predictive Feature") +
+    theme_bw() + theme(axis.text.y = element_text(face = "bold", size = 11))
+  
+  Sys.sleep(0.5)
+  print(forest_plot_zoomed)
+  
+  
 }
 
 logic()
