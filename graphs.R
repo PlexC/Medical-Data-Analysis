@@ -3,21 +3,22 @@ library(ggplot2)
 
 graphs <- function(){
   
-  #cat("Loading Healthcare_DATA.csv...\n")
+  cat("Loading Healthcare_DATA.csv...\n")
   data <- read.csv("Healthcare_DATA.csv", stringsAsFactors = FALSE)
   
   unique_adms <- data[!duplicated(data[c("PatientID", "AdmissionID")]), ]
   
-  #cat("\nTotal Unique Patients Loaded:", length(unique(unique_adms$PatientID)), "\n")
-  #cat("Total Admissions Loaded:", nrow(unique_adms), "\n\n")
+  cat("\nTotal Unique Patients Loaded:", length(unique(unique_adms$PatientID)), "\n")
+  cat("Total Admissions Loaded:", nrow(unique_adms), "\n\n")
   
-  # Date Formatting(some of the cells like the dates keep bugging out the reading)
+  # Date Formatting
   unique_adms$AdmissionStartDate <- as.Date(substr(unique_adms$AdmissionStartDate, 1, 10), format="%Y-%m-%d")
   unique_adms$AdmissionEndDate   <- as.Date(substr(unique_adms$AdmissionEndDate, 1, 10), format="%Y-%m-%d")
   unique_adms <- unique_adms[!is.na(unique_adms$AdmissionStartDate), ]
   unique_adms <- unique_adms[order(unique_adms$PatientID, unique_adms$AdmissionStartDate), ]
   
-  #cat("Calculating 30-Day Readmissions...\n")
+  cat("Calculating 30-Day Readmissions...\n")
+  
   calc_readmission <- function(sub_df) {
     n <- nrow(sub_df)
     sub_df$DaysToNext <- NA
@@ -33,21 +34,21 @@ graphs <- function(){
   final_df <- ddply(unique_adms, .(PatientID), calc_readmission)
   final_df$Readmitted30 <- factor(final_df$Readmitted30, levels = c(0, 1), labels = c("No", "Yes"))
   
-  # Feature Engineering 
+  # Feature Engineering
   final_df$PatientDateOfBirth <- as.Date(substr(final_df$PatientDateOfBirth, 1, 10), format="%Y-%m-%d")
   final_df$Initial_LOS <- as.numeric(difftime(final_df$AdmissionEndDate, final_df$AdmissionStartDate, units = "days"))
   final_df$AgeAtAdmission <- as.numeric(difftime(final_df$AdmissionStartDate, final_df$PatientDateOfBirth, units = "days")) / 365.25
   final_df$PatientPopulationPercentageBelowPoverty <- as.numeric(as.character(final_df$PatientPopulationPercentageBelowPoverty))
   
-  #cat("Generating All EDA Graphs...\n")
+  cat("Generating All EDA Graphs...\n")
   
-  # GRAPH 1: GENDER PIE CHART 
+  # GRAPH 1: PIE CHART
   unique_patients_df <- final_df[!duplicated(final_df$PatientID), ]
   p1 <- ggplot(unique_patients_df, aes(x = "", fill = PatientGender)) +
     geom_bar(width = 1, stat = "count") +
     coord_polar("y", start = 0) +               
     geom_text(stat = 'count', aes(label = after_stat(count)), position = position_stack(vjust = 0.5), size = 6, color = "white") + 
-    labs(title = "Patient Distribution by Gender") +
+    labs(title = "True Patient Distribution by Gender") +
     theme_void() + theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
   print(p1)
   
@@ -55,7 +56,7 @@ graphs <- function(){
   p2 <- ggplot(final_df, aes(x = Readmitted30, fill = Readmitted30)) +
     geom_bar() +
     geom_text(stat='count', aes(label=after_stat(count)), vjust=-0.5, size = 5) + 
-    labs(x = "Total Admission VS 30 day Readmission", y = "Total Admissions") +
+    labs(title = "Class Distribution: 30-Day Readmission", x = "Readmitted Within 30 Days?", y = "Total Admissions") +
     scale_fill_manual(values = c("No" = "#5b9bd5", "Yes" = "#ed7d31")) +
     theme_minimal() + theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
   print(p2)
@@ -66,13 +67,14 @@ graphs <- function(){
   p3 <- ggplot(admin_counts, aes(x = NumAdmissions)) +
     geom_bar(fill = "#2c3e50", color = "black", alpha = 0.8) +
     scale_x_continuous(breaks = seq(1, max(admin_counts$NumAdmissions), by = 1)) +
-    labs(title = "Hospital Utilization: Patients per Number of Admissions", x = "Number of Admissions", y = "Number of Patients") +
+    labs(title = "Hospital Utilization: Admissions per Patient", x = "Total Number of Admissions", y = "Number of Patients") +
     theme_minimal()
   print(p3)
   
-  
-  
+  # =====================================================================
   # GRAPH 4 FIX: CLEAN BAR CHART (geom_col)
+  # Groups patients into age brackets and plots the Average Length of Stay
+  # =====================================================================
   # 1. Create Age Brackets using Base R
   final_df$AgeGroup <- cut(final_df$AgeAtAdmission, 
                            breaks = c(0, 30, 40, 50, 60, 70, 80, 120), 
@@ -114,7 +116,7 @@ graphs <- function(){
   p7 <- ggplot(final_df, aes(x = AgeAtAdmission, fill = Readmitted30)) +
     geom_density(alpha = 0.5) +
     scale_fill_manual(values = c("No" = "#5b9bd5", "Yes" = "#ed7d31")) +
-    labs(title = "Age Distribution Density by Readmission", x = "Age at Admission (Years)", y = "Density") +
+    labs(title = "Age Distribution Density by Readmission Status", x = "Age at Admission (Years)", y = "Density") +
     theme_minimal()
   print(p7)
   
@@ -131,8 +133,7 @@ graphs <- function(){
     theme_bw()
   print(p8)
   
-  #assign("final_df", final_df, envir = .GlobalEnv)
-  #cat("\nSuccessfully saved 'final_df' to your environment for modeling!\n")
+  assign("final_df", final_df, envir = .GlobalEnv)
 }
 
 graphs()
