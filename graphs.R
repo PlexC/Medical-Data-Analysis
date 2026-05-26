@@ -133,6 +133,17 @@ graphs <- function(){
     theme_bw()
   print(p8)
   
+  
+  p9 <- ggplot(final_df, aes(x = PatientGender, fill = Readmitted30)) +
+    geom_bar(position = "dodge", color = "black", alpha = 0.85) +
+    scale_fill_manual(values = c("No" = "#5b9bd5", "Yes" = "#ed7d31")) +
+    geom_text(stat = 'count', aes(label = after_stat(count)), position = position_dodge(width = 0.9), vjust = -0.5, size = 4.5, fontface = "bold") +
+    labs(title = "Demographic Impact: Gender vs 30-Day Readmission",
+         subtitle = "Total volume of readmissions broken down by patient gender",
+         x = "Patient Gender", y = "Total Admissions") +
+    theme_bw() + theme(axis.text.x = element_text(face = "bold", size = 12))
+  print(p9)
+  
   assign("final_df", final_df, envir = .GlobalEnv)
 }
 
