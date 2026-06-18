@@ -72,10 +72,8 @@ graphs <- function(){
   print(p3)
   
   # =====================================================================
-  # GRAPH 4 FIX: CLEAN BAR CHART (geom_col)
-  # Groups patients into age brackets and plots the Average Length of Stay
+  # GRAPH 4 Groups patients into age brackets and plots the Average Length of Stay
   # =====================================================================
-  # 1. Create Age Brackets using Base R
   final_df$AgeGroup <- cut(final_df$AgeAtAdmission, 
                            breaks = c(0, 30, 40, 50, 60, 70, 80, 120), 
                            labels = c("<30", "30-39", "40-49", "50-59", "60-69", "70-79", "80+"))
@@ -133,7 +131,7 @@ graphs <- function(){
     theme_bw()
   print(p8)
   
-  
+  #GRAPH 6 Gender vs 30Readmission
   p9 <- ggplot(final_df, aes(x = PatientGender, fill = Readmitted30)) +
     geom_bar(position = "dodge", color = "black", alpha = 0.85) +
     scale_fill_manual(values = c("No" = "#5b9bd5", "Yes" = "#ed7d31")) +

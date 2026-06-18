@@ -80,6 +80,8 @@ logic <- function(){
   
   # VISUAL 1: THE CLINICAL DECISION TREE
   cat("Training Cost-Sensitive Classification Tree...\n")
+  
+  #Penalty matrix to lower false negatives
   penalty_matrix <- matrix(c(0, 1, 50, 0), byrow = TRUE, nrow = 2)
   
   tree_model_forced <- rpart(Readmitted30 ~ ., data = train_data, method = "class", 
