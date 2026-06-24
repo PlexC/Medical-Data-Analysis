@@ -142,7 +142,70 @@ graphs <- function(){
     theme_bw() + theme(axis.text.x = element_text(face = "bold", size = 12))
   print(p9)
   
+  p10 <- ggplot(final_df, aes(x = Initial_LOS, color = Readmitted30)) +
+    geom_freqpoly(aes(y = after_stat(density)), binwidth = 1, linewidth = 1.2) +
+    coord_cartesian(xlim = c(0, 20)) +  
+    scale_color_manual(values = c("No" = "#5b9bd5", "Yes" = "#ed7d31")) +
+    labs(title = "Length of Stay Distribution: Readmitted vs Normal Recovery", 
+         x = "Initial Length of Stay (Days)", y = "Percentage of Group's Total Population") +
+    theme_bw()
+  print(p10)
+  
+  p11 <- ggplot(final_df, aes(x = Initial_LOS, fill = Readmitted30)) +
+    geom_density(alpha = 0.5, color = "black") +
+    coord_cartesian(xlim = c(0, 20)) +  
+    scale_fill_manual(values = c("No" = "#5b9bd5", "Yes" = "#ed7d31")) +
+    labs(title = "Length of Stay Distribution: Readmitted vs Normal Recovery", 
+         x = "Initial Length of Stay (Days)", y = "Density") +
+    theme_bw()
+  print(p11)
+  
+  
+  
+  
+  readmitted_only <- final_df[final_df$Readmitted30 == "Yes", ]
+  diag_freq <- as.data.frame(table(readmitted_only$PrimaryDiagnosisDescription))
+  top_5_names <- as.character(diag_freq[order(-diag_freq$Freq), ][1:5, "Var1"])
+  
+  top_5_df <- final_df[final_df$PrimaryDiagnosisDescription %in% top_5_names, ]
+  
+  readmitted_only <- final_df[final_df$Readmitted30 == "Yes", ]
+  diag_freq <- as.data.frame(table(readmitted_only$PrimaryDiagnosisDescription))
+  colnames(diag_freq) <- c("Diagnosis", "Frequency")
+  top_diags_readm <- diag_freq[order(-diag_freq$Frequency), ][1:5, ]
+  
+  # Extract just the names of those 5 specific diseases
+  top_5_names <- as.character(top_diags_readm$Diagnosis)
+  
+  # 2. Filter the main dataset to include EVERYONE (Yes and No) who had those 5 diseases
+  top_5_df <- final_df[final_df$PrimaryDiagnosisDescription %in% top_5_names, ]
+  
+  # 3. Plot the Grouped Bar Chart
+  p12 <- ggplot(top_5_df, aes(x = PrimaryDiagnosisDescription, fill = Readmitted30)) +
+    geom_bar(position = "dodge", color = "black", alpha = 0.85) +
+    geom_text(stat = 'count', aes(label = after_stat(count)), 
+              position = position_dodge(width = 0.9), hjust = -0.2, size = 4, fontface = "bold") +
+    scale_fill_manual(values = c("No" = "#5b9bd5", "Yes" = "#ed7d31")) +
+    coord_flip() +  
+    labs(title = "High-Risk Diagnoses: Readmission vs Normal Recovery", 
+         subtitle = "Comparing the outcomes for the Top 5 highest-risk diseases",
+         x = "Primary Diagnosis", y = "Total Admissions") +
+    theme_bw() + 
+    theme(axis.text.y = element_text(face = "bold", size = 10))
+  print(p12)
+  
+  p13 <- ggplot(final_df, aes(x = Initial_LOS, fill = Readmitted30)) +
+    geom_density(alpha = 0.5, color = "black") +
+    coord_cartesian(xlim = c(0, 20)) +  
+    scale_fill_manual(values = c("No" = "#5b9bd5", "Yes" = "#ed7d31")) +
+    labs(title = "Length of Stay Distribution: Readmitted vs Normal Recovery", 
+         x = "Initial Length of Stay (Days)", y = "Density") +
+    theme_bw()
+  print(p13)
+  
   assign("final_df", final_df, envir = .GlobalEnv)
 }
+  
+
 
 graphs()
